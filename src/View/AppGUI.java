@@ -2,8 +2,9 @@ package View;
 
 import Model.Element;
 import se.mau.DA343A.VT25.assignment1.AirQualityApp;
-import se.mau.DA343A.VT25.assignment1.IElementIcon;
 import Controller.Controller;
+import se.mau.DA343A.VT25.assignment1.MovedOutOfGridException;
+
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -32,7 +33,12 @@ public class AppGUI extends AirQualityApp {
 
     @Override
     protected void buttonNextTimeStepClicked() {
-
+        try {
+            controller.updateGUI();
+            repaint();
+        }catch (MovedOutOfGridException e){
+            System.err.println(e.getMessage());
+        }
 
     }
 

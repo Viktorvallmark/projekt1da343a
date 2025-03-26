@@ -4,6 +4,7 @@ import se.mau.DA343A.VT25.assignment1.Direction;
 import se.mau.DA343A.VT25.assignment1.IElementIcon;
 import se.mau.DA343A.VT25.assignment1.ImageResources;
 
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -67,6 +68,10 @@ public class Element implements IElement, IElementIcon {
         return this.name;
     }
 
+    public int getPollution(){
+        return this.pollution;
+    }
+
 
     private void setDirection(){
         double num = Math.random();
@@ -119,29 +124,26 @@ public class Element implements IElement, IElementIcon {
     /***
      * shifts the icon left or right depending on direction
      * @param direction Compass direction
-     * @return new x-position after time step.
      */
-    public int newXPosition(Direction direction) {
+    public void newXPosition(Direction direction) {
 
         switch(direction) {
             case EAST -> setRow(getRow()+speed);
             case WEST -> setRow(getRow()-speed);
         }
 
-        return getRow();
     }
 
     /***
      * shifts the icon north or south depending on direction
      * @param direction Compass direction
-     * @return new y-position after time step.
      */
-    public int newYPosition(Direction direction){
+    public void newYPosition(Direction direction) {
         switch (direction){
             case NORTH -> setCol(getColumn()+speed);
             case SOUTH -> setCol(getColumn()-speed);
         }
-        return getColumn();
+
     }
 
     /***
