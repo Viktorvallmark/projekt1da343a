@@ -36,9 +36,12 @@ public class Controller {
     }
 
 
-    private void calculatePollution(double[][] grid){
+    private void calculatePollution(){
         double[][] newDiffusion = new double[100][100];
-        newDiffusion = grid;
+        newDiffusion = this.pollutionGrid;
+
+
+
     }
 
 
