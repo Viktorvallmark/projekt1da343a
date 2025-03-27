@@ -1,0 +1,66 @@
+classDiagram
+%% Main Class
+    class Main {
+        +main(String[] args)$ void
+    }
+
+%% Controller Class
+    class Controller {
+        -AppGUI gui
+        -IsLand isLand
+        -List~Element~ icons
+        -double[][] pollutionGrid
+        -GRID_SIZE: int
+        +Controller(IsLand)
+        +setIcons(List~Element~) void
+        +getGui() AppGUI
+        +setGui(AppGUI) void
+        +updateGUI() void
+        +createElement(int, int) void
+    }
+
+%% Element Class
+    class Element {
+        -BufferedImage image
+        -Direction direction
+        -speed: int
+        -name: String
+        -x: int
+        -y: int
+        -pollution: int
+        +getName() String
+        +getPollution() int
+        +rotateImage() BufferedImage
+    }
+
+%% IElement Interface
+    class IElement
+    <<interface>> IElement
+    IElement : +rotateImage() BufferedImage
+
+%% AppGUI Class
+    class AppGUI {
+        -List~Element~ icons
+        -Controller controller
+        +AppGUI(String[], BufferedImage)
+        +setController(Controller) void
+        +setIcons(List~Element~) void
+    }
+
+%% AirQualityApp (Abstract)
+    class AirQualityApp {
+        <<abstract>>
+        +mouseClicked(int, int)* void
+        +buttonNextTimeStepClicked()* void
+        +elementIconsToPaint()* List
+    }
+
+%% Relationships
+    Controller "1"*--> "1"AppGUI
+    Controller --> IsLand : 1
+    Controller "1" *--> "*" Element : contains
+    AppGUI --|> AirQualityApp
+    AppGUI --> Element : uses
+    Element ..|> IElement : implements
+    Main --> AppGUI : creates
+    Main --> Controller : creates

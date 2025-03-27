@@ -16,11 +16,12 @@ public class Controller {
     private final IsLand isLand;
     private List<Element> icons;
     private double[][] pollutionGrid;
+    private static final int GRID_SIZE = 100;
 
 
     public Controller(IsLand isLand) {
         this.isLand = isLand;
-        pollutionGrid = new double[100][100];
+        pollutionGrid = new double[GRID_SIZE][GRID_SIZE];
     }
 
     public void setIcons(List<Element> icons){
@@ -37,11 +38,58 @@ public class Controller {
 
 
     private void calculatePollution(){
-        double[][] newDiffusion = new double[100][100];
-        newDiffusion = this.pollutionGrid;
+        double[][] temp = new double[GRID_SIZE][GRID_SIZE];
+        for(int x = 0; x < GRID_SIZE; x++){
+            for(int y = 0; y < GRID_SIZE; y++) {
 
+                double sum = 0;
+                if(x > 0){
+                    sum += pollutionGrid[x-1][y];
+                }
+                if(x < GRID_SIZE - 1){
+                    sum += pollutionGrid[x+1][y];
+                }
+                if(y > 0) {
+                    sum += pollutionGrid[x][y-1];
+                }
+                if (y < GRID_SIZE - 1){
+                    sum += pollutionGrid[x][y+1];
+                }
+                sum += pollutionGrid[x][y];
+                temp[x][y] = sum / 5.0;
+            }
+        }
 
+        for(Element element : icons){
+            if (element.getName().equals("Woodland")){
+                int row = element.getRow();
+                int col = element.getColumn();
 
+                temp[row][col] += element.getPollution();
+
+                if(row > 0) temp[row-1][col] -= 2.5;
+                if(row < GRID_SIZE - 1) temp[row+1][col] -= 2.5;
+                if(col > 0) temp[row][col-1] -= 2.5;
+                if(col < GRID_SIZE - 1) temp[row][col+1] -= 2.5;
+
+            }
+        }
+
+        for(int x = 0; x < GRID_SIZE; x++){
+            for(int y = 0; y < GRID_SIZE; y++){
+                temp[x][y] = Math.max(temp[x][y], 0);
+            }
+        }
+
+        pollutionGrid = temp;
+    }
+
+    private void setPollution(){
+        for(int x = 0; x < pollutionGrid.length; x++){
+            for (int y = 0; y < pollutionGrid[x].length; y++){
+                gui.setPollution(x,y,pollutionGrid[x][y]);
+            }
+        }
     }
 
 
@@ -52,30 +100,36 @@ public class Controller {
                 element.newXPosition(element.getDirection());
                 element.newYPosition(element.getDirection());
                 element.newDirection();
-
                 try {
-                    gui.setPollution(element.getRow(),element.getColumn(),element.getPollution());
-                    if (element.getColumn() > 100 || element.getColumn() <= 0 || element.getRow() > 100 || element.getRow() <= 0) {
+                    int row = element.getRow();
+                    int col = element.getColumn();
+
+                    if (element.getColumn() >= GRID_SIZE || element.getColumn() < 0 || element.getRow() >= GRID_SIZE || element.getRow() < 0) {
                         throw new MovedOutOfGridException();
                     }
-                }catch (MovedOutOfGridException e){
 
+                    pollutionGrid[row][col] += element.getPollution();
+                    gui.setPollution(row,col,pollutionGrid[row][col]);
+                }catch (MovedOutOfGridException e){
                     elementsToRemove.add(element);
                     JOptionPane.showMessageDialog(null, e.getMessage());
                 }catch (IllegalArgumentException e){
-                    System.err.println(e.getMessage());
+                    pollutionGrid[element.getRow()][element.getColumn()] = 0.0f;
+                    gui.setPollution(element.getRow(),element.getColumn(),0.0f);
                 }
+
                 if ((!isLand.isLand(element.getRow(), element.getColumn())) && (!element.getName().equals("Airplane"))) {
                     elementsToRemove.add(element);
                     JOptionPane.showMessageDialog(null, "Only airplanes can be over water!");
                 }
             }
+            calculatePollution();
+            setPollution();
             icons.removeAll(elementsToRemove);
     }
 
     public void createElement(int row, int col) throws IllegalArgumentException {
         String element = gui.getSelectedElementType();
-        List<Element> temp = new Vector<>(10);
         try {
             if ((isLand.isLand(row, col))) {
                 switch (element) {
@@ -88,21 +142,17 @@ public class Controller {
                         for (IElementIcon icon : icons) {
                             if (icon.getColumn() == col && icon.getRow() == row) {
                                 throw new IllegalArgumentException("Can't have two unmovable objects on same position");
-                            } else {
-                                temp.add(new Element(0, "Woodland", row, col, -5));
                             }
                         }
-                        icons.addAll(temp);
+                        icons.add(new Element(0, "Woodland", row, col, -5));
                     }
                     default -> {
                         for (IElementIcon icon : icons) {
                             if (icon.getColumn() == col && icon.getRow() == row) {
                                 throw new IllegalArgumentException("Can't have two unmovable objects on same position");
-                            } else {
-                                temp.add(new Element(0, "Factory", row, col, 10));
                             }
                         }
-                        icons.addAll(temp);
+                        icons.add(new Element(0, "Factory", row, col, 10));
                     }
                 }
             } else {
@@ -114,9 +164,7 @@ public class Controller {
             }
             gui.setIcons(icons);
         } catch (IllegalArgumentException e) {
-
             JOptionPane.showMessageDialog(null,"Can't place element here");
-
         }
     }
 }

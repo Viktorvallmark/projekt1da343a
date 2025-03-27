@@ -5,6 +5,7 @@ import se.mau.DA343A.VT25.assignment1.AirQualityApp;
 import Controller.Controller;
 import se.mau.DA343A.VT25.assignment1.MovedOutOfGridException;
 
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -23,12 +24,19 @@ public class AppGUI extends AirQualityApp {
 
     @Override
     protected void mouseClicked(int row, int col) {
-        controller.createElement(row,col);
-        repaint();
+        try{
+
+            controller.createElement(row,col);
+            repaint();
+        }catch (IllegalArgumentException e){
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        }
     }
 
     public void setIcons(List<Element> icons){
         this.icons = icons;
+
+
     }
 
     @Override
